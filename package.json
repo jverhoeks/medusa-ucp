@@ -1,0 +1,74 @@
+{
+  "name": "@jverhoeks/medusa-ucp",
+  "version": "0.1.0-rc.1",
+  "description": "Read-only UCP catalogue discovery over REST and MCP for Medusa v2",
+  "license": "MIT",
+  "author": "Jacob Verhoeks",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jverhoeks/medusa-ucp.git"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "npm@11.19.0",
+  "files": [
+    ".medusa/server",
+    "README.md",
+    "LICENSE",
+    "docs",
+    "spec",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./*": "./.medusa/server/src/*.js",
+    "./admin": {
+      "import": "./.medusa/server/src/admin/index.mjs",
+      "require": "./.medusa/server/src/admin/index.js"
+    }
+  },
+  "scripts": {
+    "build": "medusa plugin:build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.mjs",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "medusa-v2",
+    "medusa-plugin-other",
+    "ucp",
+    "mcp",
+    "catalog"
+  ],
+  "peerDependencies": {
+    "@medusajs/framework": "2.21.2",
+    "@medusajs/medusa": "2.21.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "ipaddr.js": "2.2.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@medusajs/cli": "2.21.2",
+    "@medusajs/framework": "2.21.2",
+    "@medusajs/medusa": "2.21.2",
+    "@medusajs/types": "2.21.2",
+    "@swc/core": "^1.16.18",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.0.0",
+    "@types/supertest": "^6.0.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "3.0.1",
+    "supertest": "^7.1.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.6.2"
+  },
+  "overrides": {
+    "qs": "6.16.1",
+    "postcss": "8.5.30"
+  }
+}
