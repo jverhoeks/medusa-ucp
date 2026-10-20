@@ -173,7 +173,8 @@ Vendored schemas are attributed in THIRD_PARTY_NOTICES.md and SHA256-pinned in
 spec/manifest.json. They are validation fixtures; this is not an upstream-certified
 conformance suite.
 
-Search scans a bounded public catalogue without caching prices. Pagination
+Search scans a bounded public catalogue without caching prices. The default
+Store API load has a 20-second deadline and an 8 MiB cumulative response bound. Pagination
 restarts if the relevant catalogue snapshot changes. A process-local limiter
 allows 120 requests/minute per Express-resolved IP with at most 5000 active keys,
 and at most 8 catalogue executions run concurrently. Configure trusted proxy

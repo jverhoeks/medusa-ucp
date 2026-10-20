@@ -23,7 +23,14 @@ export function publicAddress(address: string) {
 /** Pin TLS to the DNS answers we vetted. No redirects, ambient auth or private IPs. */
 export async function downloadProfile(url: URL, resolver: typeof lookup = lookup): Promise<Json> {
   const host = url.hostname.replace(/^\[|\]$/g, "")
-  const addresses = await resolver(host, { all: true })
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let addresses
+  try {
+    addresses = await Promise.race([
+      resolver(host, { all: true }),
+      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new CatalogError(502, "Platform profile DNS lookup timed out")), 5000) }),
+    ])
+  } finally { if (timer) clearTimeout(timer) }
   if (!addresses.length || addresses.some(a => !publicAddress(a.address))) throw new CatalogError(400, "Platform profile resolved to a non-public address")
   return new Promise((resolve, reject) => {
     const request = https.get(url, {
