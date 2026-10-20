@@ -10,6 +10,8 @@ import { RateLimiter } from "./rate-limit"
 
 export class CatalogHttp {
   private limiter = new RateLimiter()
+  private nextCompatibilityWarning = 0
+  private suppressedCompatibilityWarnings = 0
   constructor(public service: CatalogService) {}
   async handle(req: Request, res: Response, kind: Operation | "profile" | "ai-catalog" | "api-catalog" | "server-card" | "openapi" | "mcp") {
     try {
@@ -88,6 +90,32 @@ export class CatalogHttp {
       allowedHosts: [new URL(options.apiUrl).host], allowedOrigins: [options.apiUrl, options.storefrontUrl] })
     res.on("close", () => { void transport.close(); void server.close() })
     await server.connect(transport)
-    await transport.handleRequest(req, res, req.body)
+    // This transport always returns JSON, never an SSE stream. Only adapt an
+    // explicit acceptable JSON-only range, not missing/wildcard/other formats.
+    const accept = req.get("accept")?.trim()
+    const jsonOnly = accept && /^application\/json(?:\s*;\s*q=(0(?:\.\d{1,3})?|1(?:\.0{1,3})?))?$/i.exec(accept)
+    const compatible = options.allowJsonOnlyMcp === true && jsonOnly && Number(jsonOnly[1] ?? 1) > 0
+    const originalAccept = req.headers.accept
+    const originalRawHeaders = req.rawHeaders
+    if (compatible) {
+      req.headers.accept = "application/json, text/event-stream"
+      // Hono uses both normalized and raw Node headers; keep its view consistent.
+      req.rawHeaders = originalRawHeaders.flatMap((value, index) => index % 2 === 0 && value.toLowerCase() !== "accept" ? [value, originalRawHeaders[index + 1]] : [])
+      req.rawHeaders.push("Accept", req.headers.accept)
+      const now = Date.now()
+      if (now >= this.nextCompatibilityWarning) {
+        console.warn(JSON.stringify({ level: "warn", code: "UCP_MCP_JSON_ONLY_ACCEPT", message: "Accepted a JSON-only MCP client using the compatibility option; client should advertise application/json and text/event-stream", suppressed_requests: this.suppressedCompatibilityWarnings }))
+        this.nextCompatibilityWarning = now + 60000
+        this.suppressedCompatibilityWarnings = 0
+      } else this.suppressedCompatibilityWarnings++
+    }
+    try { await transport.handleRequest(req, res, req.body) }
+    finally {
+      if (compatible) {
+        if (originalAccept === undefined) delete req.headers.accept
+        else req.headers.accept = originalAccept
+        req.rawHeaders = originalRawHeaders
+      }
+    }
   }
 }

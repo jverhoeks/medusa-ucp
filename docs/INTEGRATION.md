@@ -33,3 +33,6 @@ excluded from packages.
 The runtime integration test was executed with Medusa 2.21.2/PostgreSQL 16 on a
 fresh local database. It is separate from unit/HTTP/schema tests and does not
 claim a live shop deployment, Stripe integration or full upstream certification.
+
+If port9003 is occupied, set `UCP_FIXTURE_PORT=9004` for both server and verifier,
+and pass `-p9004` to Medusa. Preserve unrelated running fixtures.

@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs'
 import {randomUUID} from 'node:crypto'
 import {Client} from '@modelcontextprotocol/sdk/client/index.js'
 import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-const base='http://localhost:9003'
+const base=`http://localhost:${Number(process.env.UCP_FIXTURE_PORT || 9003)}`
 const state=JSON.parse(readFileSync(new URL('./app/.fixture-state.json',import.meta.url)))
 let ready=false
 for(let attempt=0;attempt<30;attempt++){
@@ -24,6 +24,8 @@ assert.equal(response.status,200,await response.clone().text());const results=aw
 const detail=await fetch(base+'/ucp/catalog/product',{method:'POST',headers,body:JSON.stringify({id:state.ids[0],selected:[{name:'Size',label:'Small'}]}),signal:AbortSignal.timeout(30000)});assert.equal(detail.status,200,await detail.clone().text())
 const variant=results.products[0].variants[0].id
 const lookup=await fetch(base+'/ucp/catalog/lookup',{method:'POST',headers,body:JSON.stringify({ids:[variant,'does-not-exist']}),signal:AbortSignal.timeout(30000)});assert.equal(lookup.status,200);const batch=await lookup.json();assert.equal(batch.products.length,1);assert.equal(batch.products[0].variants[0].inputs[0].id,variant)
+const legacy=await fetch(base+'/ucp/mcp',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:71,method:'tools/list'}),signal:AbortSignal.timeout(10000)})
+assert.equal(legacy.status,200);assert.equal((await legacy.json()).result.tools.length,3)
 const client=new Client({name:'medusa-real-fixture-agent',version:'1.0.0'});const transport=new StreamableHTTPClientTransport(new URL(base+'/ucp/mcp'))
 try{
  await client.connect(transport);const tools=await client.listTools();assert.deepEqual(tools.tools.map(t=>t.name).sort(),['get_product','lookup_catalog','search_catalog'])
