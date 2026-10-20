@@ -1,0 +1,8 @@
+node_modules/
+.medusa/
+*.tgz
+.env*
+coverage/
+.DS_Store
+.fixture-state.json
+integration/app/.fixture-state.json
