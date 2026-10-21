@@ -71,7 +71,7 @@ export class CatalogHttp {
     for (const operation of ["search_catalog", "lookup_catalog", "get_product"] as const) {
       server.registerTool(operation, {
         description: operation === "search_catalog" ? "Search published products by text, category and price in currency minor units. Use context.intent for gift context; this is lexical search, not an LLM recommender." : operation === "lookup_catalog" ? "Lookup public products/variants by exact identifiers." : "Read a public product and exact selected variants with current regional price and availability.",
-        inputSchema: z.object({ meta: z.object({ "ucp-agent": z.object({ profile: z.string().url().max(2000) }).strict() }).strict(), catalog: schemas[operation] }).strict(),
+        inputSchema: z.object({ meta: z.object({ "ucp-agent": z.object({ profile: z.string().url().max(2000) }).strict(), "idempotency-key": z.string().uuid().optional() }).strict(), catalog: schemas[operation] }).strict(),
         annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
       }, async (args: any) => {
         try {

@@ -139,6 +139,11 @@ MCP uses the standard tool names, with arguments:
 }
 ```
 
+MCP accepts the standard optional `meta["idempotency-key"]` UUID. Catalogue reads
+do not persist it, log it, grant authority from it or cache results by it; every
+read still evaluates current public prices and stock. It does not implement
+checkout/payment retry semantics. Other unknown metadata is still rejected.
+
 MCP clients initialize and use `tools/list` / `tools/call` normally. Only the three
 read-only tools are registered. Results are returned in `structuredContent` and
 text; missing products are UCP business outcomes, malformed calls are tool errors.

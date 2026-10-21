@@ -56,3 +56,16 @@ test('opt-in JSON-only compatibility returns JSON, coalesces warnings and preser
  r=await request(a).post('/ucp/mcp').set('Host','shop.example').set('Accept','application/json').send({jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'search_catalog',arguments:{catalog:search}}});assert.equal(r.status,200);assert(r.body.result.isError)
  r=await request(a).post('/ucp/mcp').set('Host','shop.example').set('Accept','application/json').send({jsonrpc:'2.0',id:3,method:'tools/call',params:{name:'search_catalog',arguments:{meta:{'ucp-agent':{profile:profileUrl}},catalog:search}}});assert.equal(r.status,200);assert.equal(r.body.result.structuredContent.products.length,2)
 })
+
+test('standard optional idempotency UUID works for both MCP Accept forms without bypassing tool validation',async()=>{
+ const a=app();a.locals.ucp.service.options.allowJsonOnlyMcp=true
+ const args={meta:{'ucp-agent':{profile:profileUrl},'idempotency-key':'550e8400-e29b-41d4-a716-446655440000'},catalog:search}
+ const send=(accept,arguments_)=>request(a).post('/ucp/mcp').set('Host','shop.example').set('Accept',accept).send({jsonrpc:'2.0',id:9,method:'tools/call',params:{name:'search_catalog',arguments:arguments_}})
+ for(const accept of ['application/json','application/json, text/event-stream']){
+  const r=await send(accept,args);assert.equal(r.status,200);assert(!r.body.result.isError);assert.equal(r.body.result.structuredContent.products.length,2)
+  assert(!JSON.stringify(r.body.result).includes(args.meta['idempotency-key']))
+ }
+ for(const meta of [{...args.meta,'idempotency-key':'not-a-uuid'},{...args.meta,payment:{method:'stripe'}}]){
+  const r=await send('application/json',{...args,meta});assert.equal(r.status,200);assert(r.body.result.isError)
+ }
+})

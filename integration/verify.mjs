@@ -6,7 +6,7 @@ import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/st
 const base=`http://localhost:${Number(process.env.UCP_FIXTURE_PORT || 9003)}`
 const state=JSON.parse(readFileSync(new URL('./app/.fixture-state.json',import.meta.url)))
 let ready=false
-for(let attempt=0;attempt<30;attempt++){
+for(let attempt=0;attempt<90;attempt++){
  try{const health=await fetch(base+'/health',{signal:AbortSignal.timeout(1000)});if(health.ok){ready=true;break}}catch{}
  await new Promise(resolve=>setTimeout(resolve,1000))
 }
@@ -28,7 +28,7 @@ const legacy=await fetch(base+'/ucp/mcp',{method:'POST',headers:{'Content-Type':
 assert.equal(legacy.status,200);assert.equal((await legacy.json()).result.tools.length,3)
 const client=new Client({name:'medusa-real-fixture-agent',version:'1.0.0'});const transport=new StreamableHTTPClientTransport(new URL(base+'/ucp/mcp'))
 try{
- await client.connect(transport);const tools=await client.listTools();assert.deepEqual(tools.tools.map(t=>t.name).sort(),['get_product','lookup_catalog','search_catalog'])
- const result=await client.callTool({name:'search_catalog',arguments:{meta:{'ucp-agent':{profile}},catalog:input}});assert.equal(result.structuredContent.products.length,2);assert(!result.isError)
+ await client.connect(transport);assert.equal(client.getServerVersion()?.version,JSON.parse(readFileSync(new URL('../package.json',import.meta.url))).version);const tools=await client.listTools();assert.deepEqual(tools.tools.map(t=>t.name).sort(),['get_product','lookup_catalog','search_catalog'])
+ const result=await client.callTool({name:'search_catalog',arguments:{meta:{'ucp-agent':{profile},'idempotency-key':randomUUID()},catalog:input}});assert.equal(result.structuredContent.products.length,2);assert(!result.isError)
 }finally{await client.close();await transport.close()}
 console.log('Real Medusa fixture passed: root discovery, REST search/lookup/details, Store API regional prices, privacy and official MCP client; no orders or payments')

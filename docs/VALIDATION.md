@@ -36,3 +36,17 @@ enabled. Types and plugin/backend-admin builds pass. The actual Medusa fixture o
 an isolated port accepted the JSON-only call, emitted the structured warning, and
 passed standard REST/MCP price/privacy checks without data writes or payments.
 Strict default behavior remains unchanged; no runtime dependency changed.
+
+## rc.3 standard metadata
+
+The actual Shopify CLI search sends the standard optional meta.idempotency-key.
+Accept and validate that UUID while leaving unknown metadata rejected. Catalogue
+reads do not persist/log it or treat it as authorization or payment retry state.
+20 focused tests and types pass. Explicitly run npm run build before packaging;
+local npm lifecycle scripts may be disabled. Check that the packed JavaScript's
+PACKAGE_VERSION matches package.json and contains the new metadata validator,
+not only that source tests pass. The previous rc.2 artifact's transport feature
+worked, but its compiled serverInfo version still reported rc.1; rc.3 corrects
+that generated-output mismatch as well.
+The actual Medusa fixture also passes with the UUID included and now asserts
+that MCP serverInfo matches the package version. No business data or payments.
