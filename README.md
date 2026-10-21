@@ -39,6 +39,7 @@ plugins: [{
     selection: "opt-in",
     priceMode: "tax-inclusive",
     maxProducts: 1000,
+    allowJsonOnlyMcp: false, // opt in for JSON-only clients such as Shopify CLI0.9.1
   },
 }]
 ```
@@ -142,6 +143,24 @@ MCP clients initialize and use `tools/list` / `tools/call` normally. Only the th
 read-only tools are registered. Results are returned in `structuredContent` and
 text; missing products are UCP business outcomes, malformed calls are tool errors.
 A profile URI is never persisted with a shopper prompt, cookie or customer record.
+
+## JSON-only MCP compatibility
+
+The standard MCP Accept header lists both `application/json` and
+`text/event-stream`. Some clients, including Shopify UCP CLI0.9.1, advertise only
+`application/json`. Set **`allowJsonOnlyMcp: true`** to accept that narrow case.
+The endpoint already uses JSON responses exclusively; this option does not create
+SSE streams or advertise streaming support to those clients. Strict behavior is
+the default. Missing/wildcard Accept, other media types and JSON with `q=0` do not
+receive this compatibility adaptation.
+
+The adapter normalizes only the internal SDK view of Accept and restores the
+original Node headers afterward. Host/Origin protections, authentication semantics,
+body limits, tool validation, platform negotiation, SSRF defenses and rate limits
+still run. A structured stderr warning with code `UCP_MCP_JSON_ONLY_ACCEPT` is
+emitted at most once per minute per handler; `suppressed_requests` summarizes
+additional compatibility calls. It logs no IP, headers, credentials, prompt or
+product data. Standards-compliant calls do not trigger the warning.
 
 ## Payments later
 

@@ -26,3 +26,13 @@ Stripe's documented own-UCP/Stripe-payments arrangement is the future target.
 The supported-country list includes NL, but the owner's profile, agent commerce
 relationships, product access, currency/method/SCA flow and sandbox integration
 have not been exercised. No Stripe credentials were read or changed.
+
+## rc.2 JSON-only compatibility, 20 October2026
+
+All19 focused tests pass, including opt-in JSON-only tools/list and catalogue calls,
+q=0/other-format rejection, hostile Host/Origin rejection, invalid tool input and
+coalesced warning output. The official MCP client also passes with compatibility
+enabled. Types and plugin/backend-admin builds pass. The actual Medusa fixture on
+an isolated port accepted the JSON-only call, emitted the structured warning, and
+passed standard REST/MCP price/privacy checks without data writes or payments.
+Strict default behavior remains unchanged; no runtime dependency changed.

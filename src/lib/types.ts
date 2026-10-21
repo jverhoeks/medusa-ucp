@@ -1,5 +1,5 @@
 export const VERSION = "2026-08-25"
-export const PACKAGE_VERSION = "0.1.0-rc.1"
+export const PACKAGE_VERSION = "0.1.0-rc.2"
 export const SEARCH = "dev.ucp.shopping.catalog.search"
 export const LOOKUP = "dev.ucp.shopping.catalog.lookup"
 export const CAPABILITIES = [SEARCH, LOOKUP]
@@ -20,6 +20,8 @@ export type Options = {
   name?: string
   selection?: "opt-in" | "published"
   priceMode?: "tax-inclusive" | "store"
+  /** Narrow compatibility for JSON-only MCP clients; responses remain JSON. */
+  allowJsonOnlyMcp?: boolean
   maxProducts?: number
   platformProfiles?: Record<string, Json>
   /** Public-product policy. Never return private fields from this hook. */

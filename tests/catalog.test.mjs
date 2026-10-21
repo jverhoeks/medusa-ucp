@@ -61,6 +61,6 @@ test('bounded limiter does not evict active clients to bypass limits and expires
  let now=0;const l=new RateLimiter(1,1,()=>now);l.take('a');assert.throws(()=>l.take('a'));assert.throws(()=>l.take('b'));now=60001;l.take('b')
 })
 test('future payments cannot be activated through catalogue options or request input',async()=>{
- assert.throws(()=>parseOptions({...options,apiUrl:'http://public.example'}));assert.throws(()=>parseOptions({...options,maxProducts:10001}))
+ assert.throws(()=>parseOptions({...options,apiUrl:'http://public.example'}));assert.throws(()=>parseOptions({...options,maxProducts:10001}));assert.throws(()=>parseOptions({...options,allowJsonOnlyMcp:'true'}))
  await assert.rejects(()=>service().execute('search_catalog',{query:'flowers',payment:{method:'stripe'}},profileUrl),e=>e.status===400)
 })
