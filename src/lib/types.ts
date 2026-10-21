@@ -1,5 +1,5 @@
 export const VERSION = "2026-08-25"
-export const PACKAGE_VERSION = "0.1.0-rc.2"
+export const PACKAGE_VERSION = "0.1.0-rc.3"
 export const SEARCH = "dev.ucp.shopping.catalog.search"
 export const LOOKUP = "dev.ucp.shopping.catalog.lookup"
 export const CAPABILITIES = [SEARCH, LOOKUP]
