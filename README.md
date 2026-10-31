@@ -1,6 +1,6 @@
 # Medusa UCP
 
-Read-only Universal Commerce Protocol catalogue discovery for **Medusa 2.21.2**, using
+Read-only Universal Commerce Protocol catalogue discovery for **Medusa 2.22.1**, using
 UCP **2026-08-25** and the official TypeScript MCP SDK. MIT licensed.
 
 - Standard REST operations: `search_catalog`, `lookup_catalog`, `get_product`.
